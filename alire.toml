@@ -1,0 +1,12 @@
+name = "neural_network"
+description = "A simple cpu example neural network"
+version = "0.1.0-dev"
+
+authors = ["Michael Hardeman"]
+maintainers = ["Michael Hardeman <mhardeman25@gmail.com>"]
+maintainers-logins = ["michael-hardeman"]
+licenses = "GPL-2.0-or-later"
+website = ""
+tags = ["neural-network", "neural-net", "ml", "llm"]
+
+executables = ["main"]
