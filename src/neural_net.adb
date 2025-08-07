@@ -66,7 +66,7 @@ package body Neural_Net is
          end loop;
       end Compute_Layer;
 
-      Last_Index : Positive := Network'First;
+      Previous_Index : Positive := Network'First;
    ---------------------
    begin -- Forward_Pass
    ---------------------
@@ -74,8 +74,8 @@ package body Neural_Net is
       Compute_Layer (Network (Network'First).all, Input);
 
       for Layer_Index in Network'First + 1 .. Network'Last loop
-         Compute_Layer (Network (Layer_Index).all, Network (Last_Index).Outputs);
-         Last_Index := Layer_Index;
+         Compute_Layer (Network (Layer_Index).all, Network (Previous_Index).Outputs);
+         Previous_Index := Layer_Index;
       end loop;
    end Forward_Pass;
 
