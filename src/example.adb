@@ -60,9 +60,11 @@ procedure Example is
       Activation => Sigmoid'Access,
       Derivative => Sigmoid_Derivative'Access);
 
-   Network : Neural_Network := [Hidden_Layer_1'Unchecked_Access,
-                                Hidden_Layer_2'Unchecked_Access,
-                                Output_Layer'Unchecked_Access];
+   Network : Neural_Network := (Input_Count => 2, Input => [others => 0.0],
+                                Layer_Count => 3, Layers => [Hidden_Layer_1'Unchecked_Access,
+                                                             Hidden_Layer_2'Unchecked_Access,
+                                                             Output_Layer'Unchecked_Access]);
+
    Target_Data : constant Float_Array := [0.9];
    Learning_Rate : constant Float := 0.5;
    Epochs : constant := 100;

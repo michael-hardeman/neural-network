@@ -129,13 +129,22 @@ package Neural_Net is
       Activation       : Math_Func; --  Activation function applied to weighted sums
       Derivative       : Math_Func; --  Derivative of activation function for backpropagation
    end record;
+
    type Layer_Access is not null access all Layer_State;
 
    --  Because Layer_State is parameterized I cannot use it here unless I provide the parameters.
    --  I cannot provide default parameters to Layer_State because that causes storage errors if
    --  you want to allocate more than the default parameter. For now I will use Access types
    --  until I learn how to deal with this situation better.
-   type Neural_Network is array (Positive range <>) of Layer_Access;
+   type Layer_Array is array (Positive range <>) of Layer_Access;
+
+   --  Complete neural network structure with input storage
+   --  This design stores the input values within the network, enabling proper
+   --  gradient computation for the first layer during backpropagation.
+   type Neural_Network (Input_Count : Positive; Layer_Count : Positive) is record
+      Input  : Float_Array (1 .. Input_Count);   --  Stored input values for gradient computation
+      Layers : Layer_Array (1 .. Layer_Count);   --  Array of computational layers
+   end record;
 
    --  Performs forward propagation through the entire network
    --  Computes outputs for each layer sequentially from input to output.

@@ -46,7 +46,8 @@ package body Neural_Net is
    -- Forward_Pass --
    ------------------
    procedure Forward_Pass (Network : in out Neural_Network; Input : Float_Array) is
-      procedure Compute_Layer (Layer : in out Layer_State; Previous_Output : Float_Array) is begin
+      procedure Compute_Layer (Layer : in out Layer_State; Previous_Output : Float_Array) is
+      begin
          for Neuron_Index in Layer.Outputs'Range loop
             declare
                Weighted_Sum : Float renames Layer.Input_Sums (Neuron_Index);
@@ -66,15 +67,21 @@ package body Neural_Net is
          end loop;
       end Compute_Layer;
 
-      Previous_Index : Positive := Network'First;
+      Previous_Index : Positive := Network.Layers'First;
    ---------------------
    begin -- Forward_Pass
    ---------------------
-      --  Network must have at least 1 layer
-      Compute_Layer (Network (Network'First).all, Input);
 
-      for Layer_Index in Network'First + 1 .. Network'Last loop
-         Compute_Layer (Network (Layer_Index).all, Network (Previous_Index).Outputs);
+      --  Store the input for later use in backpropagation
+      Network.Input (Network.Input'Range) := Input (Input'Range);
+
+      --  Compute first layer using the input
+      Compute_Layer (Network.Layers (Network.Layers'First).all, Network.Input);
+
+      --  Compute remaining layers using previous layer outputs
+      for Layer_Index in Network.Layers'First + 1 .. Network.Layers'Last loop
+         Compute_Layer (Network.Layers (Layer_Index).all,
+                        Network.Layers (Previous_Index).Outputs);
          Previous_Index := Layer_Index;
       end loop;
    end Forward_Pass;
@@ -85,7 +92,9 @@ package body Neural_Net is
    procedure Backward_Pass (Network       : in out Neural_Network;
                             Target        : Float_Array;
                             Learning_Rate : Float) is
-      procedure Compute_Output_Layer_Deltas (Layer : in out Layer_State; Target : Float_Array) is begin
+
+      procedure Compute_Output_Layer_Deltas (Layer : in out Layer_State; Target : Float_Array) is
+      begin
          --  For output layer: delta = (output - target) * activation_derivative(input_sum)
          for I in Layer.Error_Deltas'Range loop
             declare
@@ -147,32 +156,31 @@ package body Neural_Net is
             Layer.Biases (I) := Layer.Biases (I) - (Learning_Rate * Layer.Bias_Gradients (I));
          end loop;
       end Update_Weights;
-   ----------------------
-   begin -- Backward_Pass
-   ----------------------
+
+   -----------------------
+   begin --  Backward_Pass
+   -----------------------
+
       --  Step 1: Compute deltas starting from output layer
-      Compute_Output_Layer_Deltas (Network (Network'Last).all, Target);
+      Compute_Output_Layer_Deltas (Network.Layers (Network.Layers'Last).all, Target);
 
       --  Step 2: Propagate deltas backward through hidden layers
-      for Layer_Index in reverse Network'First .. Network'Last - 1 loop
-         Compute_Hidden_Layer_Deltas (Network (Layer_Index).all,
-                                      Network (Layer_Index + 1).all);
+      for Layer_Index in reverse Network.Layers'First .. Network.Layers'Last - 1 loop
+         Compute_Hidden_Layer_Deltas (Network.Layers (Layer_Index).all,
+                                      Network.Layers (Layer_Index + 1).all);
       end loop;
 
       --  Step 3: Compute gradients and update weights
-      --  First layer uses original input (would need to store this)
-      --  For now, we'll handle layers that get input from previous layers
-      for Layer_Index in Network'First + 1 .. Network'Last loop
-         Compute_Gradients (Network (Layer_Index).all,
-                            Network (Layer_Index - 1).Outputs);
-         Update_Weights (Network (Layer_Index).all, Learning_Rate);
-      end loop;
+      --  First layer uses the stored input values
+      Compute_Gradients (Network.Layers (Network.Layers'First).all, Network.Input);
+      Update_Weights (Network.Layers (Network.Layers'First).all, Learning_Rate);
 
-      --  Handle first layer separately (needs original input - this is simplified)
-      --  In a complete implementation, you'd store the original input
-      if Network'Length > 0 then
-         Update_Weights (Network (Network'First).all, Learning_Rate);
-      end if;
+      --  Remaining layers use previous layer outputs
+      for Layer_Index in Network.Layers'First + 1 .. Network.Layers'Last loop
+         Compute_Gradients (Network.Layers (Layer_Index).all,
+                            Network.Layers (Layer_Index - 1).Outputs);
+         Update_Weights (Network.Layers (Layer_Index).all, Learning_Rate);
+      end loop;
    end Backward_Pass;
 
    ----------------
@@ -208,7 +216,7 @@ package body Neural_Net is
    -- Get_Network_Output --
    ------------------------
    function Get_Network_Output (Network : Neural_Network) return Float_Array is begin
-      return Network (Network'Last).all.Outputs;
+      return Network.Layers (Network.Layers'Last).all.Outputs;
    end Get_Network_Output;
 
 end Neural_Net;
