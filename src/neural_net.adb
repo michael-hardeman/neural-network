@@ -156,7 +156,7 @@ package body Neural_Net is
       --  Step 2: Propagate deltas backward through hidden layers
       for Layer_Index in reverse Network'First .. Network'Last - 1 loop
          Compute_Hidden_Layer_Deltas (Network (Layer_Index).all,
-                                     Network (Layer_Index + 1).all);
+                                      Network (Layer_Index + 1).all);
       end loop;
 
       --  Step 3: Compute gradients and update weights
@@ -164,7 +164,7 @@ package body Neural_Net is
       --  For now, we'll handle layers that get input from previous layers
       for Layer_Index in Network'First + 1 .. Network'Last loop
          Compute_Gradients (Network (Layer_Index).all,
-                           Network (Layer_Index - 1).Outputs);
+                            Network (Layer_Index - 1).Outputs);
          Update_Weights (Network (Layer_Index).all, Learning_Rate);
       end loop;
 

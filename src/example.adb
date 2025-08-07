@@ -21,7 +21,7 @@ with Neural_Net; use Neural_Net;
 procedure Example is
    Input_Data : constant Float_Array := [0.5, 0.8];
 
-   Hidden_Layer : aliased Layer_State := (
+   Hidden_Layer_1 : aliased Layer_State := (
       Layer_Size => 3,
       Previous_Layer_Size => Input_Data'Length,
       Weights => [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]],
@@ -34,9 +34,22 @@ procedure Example is
       Activation => Sigmoid'Access,
       Derivative => Sigmoid_Derivative'Access);
 
+   Hidden_Layer_2 : aliased Layer_State := (
+      Layer_Size => 3,
+      Previous_Layer_Size => Hidden_Layer_1.Layer_Size,
+      Weights => [[0.9, 0.8, 0.7], [0.6, 0.5, 0.3], [0.2, 0.1, 0.0]],
+      Biases => [0.3, 0.2, 0.1],
+      Input_Sums => [others => 0.0],
+      Outputs => [others => 0.0],
+      Weight_Gradients => [others => [others => 0.0]],
+      Bias_Gradients => [others => 0.0],
+      Error_Deltas => [others => 0.0],
+      Activation => Sigmoid'Access,
+      Derivative => Sigmoid_Derivative'Access);
+
    Output_Layer : aliased Layer_State := (
       Layer_Size => 1,
-      Previous_Layer_Size => Hidden_Layer.Layer_Size,
+      Previous_Layer_Size => Hidden_Layer_2.Layer_Size,
       Weights => [[0.7, 0.8, 0.9]],
       Biases => [0.1],
       Input_Sums => [others => 0.0],
@@ -47,7 +60,9 @@ procedure Example is
       Activation => Sigmoid'Access,
       Derivative => Sigmoid_Derivative'Access);
 
-   Network : Neural_Network := [Hidden_Layer'Unchecked_Access, Output_Layer'Unchecked_Access];
+   Network : Neural_Network := [Hidden_Layer_1'Unchecked_Access,
+                                Hidden_Layer_2'Unchecked_Access,
+                                Output_Layer'Unchecked_Access];
    Target_Data : constant Float_Array := [0.9];
    Learning_Rate : constant Float := 0.5;
    Epochs : constant := 100;
