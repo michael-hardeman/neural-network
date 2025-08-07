@@ -18,8 +18,8 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Neural_Net; use Neural_Net;
 
-procedure Main is
-   Input_Data : constant Layer_Outputs := [0.5, 0.8];
+procedure Example is
+   Input_Data : constant Float_Array := [0.5, 0.8];
 
    Hidden_Layer : aliased Layer_State := (
       Layer_Size => 3,
@@ -48,7 +48,7 @@ procedure Main is
       Derivative => Sigmoid_Derivative'Access);
 
    Network : Neural_Network := [Hidden_Layer'Unchecked_Access, Output_Layer'Unchecked_Access];
-   Target_Data : constant Layer_Outputs := [0.9];
+   Target_Data : constant Float_Array := [0.9];
    Learning_Rate : constant Float := 0.5;
    Epochs : constant := 100;
 begin
@@ -59,7 +59,7 @@ begin
    --  Show initial output
    Forward_Pass (Network, Input_Data);
    declare
-      Initial_Output : constant Layer_Outputs := Get_Network_Output (Network);
+      Initial_Output : constant Float_Array := Get_Network_Output (Network);
       Initial_Loss : constant Float := Calculate_Loss (Initial_Output, Target_Data);
    begin
       Put_Line ("Initial Output: " & Initial_Output (1)'Image);
@@ -77,7 +77,7 @@ begin
       --  Print progress every 20 epochs
       if Epoch mod 20 = 0 then
          declare
-            Current_Output : constant Layer_Outputs := Get_Network_Output (Network);
+            Current_Output : constant Float_Array := Get_Network_Output (Network);
             Current_Loss : constant Float := Calculate_Loss (Current_Output, Target_Data);
          begin
             Put_Line ("Epoch " & Epoch'Image &
@@ -89,7 +89,7 @@ begin
 
    --  Show final results
    declare
-      Final_Output : constant Layer_Outputs := Get_Network_Output (Network);
+      Final_Output : constant Float_Array := Get_Network_Output (Network);
       Final_Loss : constant Float := Calculate_Loss (Final_Output, Target_Data);
    begin
       Put_Line ("");
@@ -99,4 +99,4 @@ begin
       Put_Line ("Loss: " & Final_Loss'Image);
       Put_Line ("Error: " & Float'Image (abs (Final_Output (1) - Target_Data (1))));
    end;
-end Main;
+end Example;

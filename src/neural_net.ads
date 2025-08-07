@@ -19,8 +19,7 @@ with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 
 package Neural_Net is
 
-   type Transformation_Func is not null access function (X : Float) return Float;
-   type Derivative_Func is not null access function (X : Float) return Float;
+   type Math_Func is not null access function (X : Float) return Float;
 
    --  Linear
    --  f(x) = alpha * x
@@ -82,7 +81,7 @@ package Neural_Net is
    function Swish (X : Float) return Float is (X * Sigmoid (X));
 
    --  Swish-1
-   --  (x) = x / (1 + exp(-x))
+   --  f(x) = x / (1 + exp(-x))
    --  A variant of swish. It introduces a division operation, which can provide different
    --  properties compared to standard Swish.
    function Swish_Minus_One (X : Float) return Float is (X / (1.0 + E_To_Power (-X)));
@@ -96,38 +95,39 @@ package Neural_Net is
       (declare S : constant Float := Sigmoid (X); begin S * (1.0 - S));
    function ReLU_Derivative (X : Float) return Float is (if X > 0.0 then 1.0 else 0.0);
 
-   type Weight_Matrix is array (Positive range <>, Positive range <>) of Float;
-   type Bias_Array    is array (Positive range <>) of Float;
-
-   type Layer_Outputs is array (Positive range <>) of Float;
-   type Layer_Outputs_Access is not null access all Layer_Outputs;
+   type Float_Array is array (Positive range <>) of Float;
+   type Float_Matrix is array (Positive range <>, Positive range <>) of Float;
 
    type Layer_State (Layer_Size : Positive; Previous_Layer_Size : Positive) is record
-      Weights          : Weight_Matrix (1 .. Layer_Size, 1 .. Previous_Layer_Size);
-      Biases           : Bias_Array    (1 .. Layer_Size);
-      Input_Sums       : Layer_Outputs (1 .. Layer_Size);
-      Outputs          : Layer_Outputs (1 .. Layer_Size);
-      Weight_Gradients : Weight_Matrix (1 .. Layer_Size, 1 .. Previous_Layer_Size);
-      Bias_Gradients   : Bias_Array    (1 .. Layer_Size);
-      Error_Deltas     : Layer_Outputs (1 .. Layer_Size);
-      Activation       : Transformation_Func;
-      Derivative       : Derivative_Func;
+      Weights          : Float_Matrix  (1 .. Layer_Size, 1 .. Previous_Layer_Size);
+      Biases           : Float_Array   (1 .. Layer_Size);
+      Input_Sums       : Float_Array   (1 .. Layer_Size);
+      Outputs          : Float_Array   (1 .. Layer_Size);
+      Weight_Gradients : Float_Matrix  (1 .. Layer_Size, 1 .. Previous_Layer_Size);
+      Bias_Gradients   : Float_Array   (1 .. Layer_Size);
+      Error_Deltas     : Float_Array   (1 .. Layer_Size);
+      Activation       : Math_Func;
+      Derivative       : Math_Func;
    end record;
    type Layer_Access is not null access all Layer_State;
 
+   --  Because Layer_State is parameterized I cannot use it here unless I provide the parameters.
+   --  I cannot provide default parameters to Layer_State because that causes storage errors if
+   --  you want to allocate more than the default parameter. For now I will use Access types
+   --  until I learn how to deal with this situation better.
    type Neural_Network is array (Positive range <>) of Layer_Access;
 
-   procedure Forward_Pass (Network : in out Neural_Network; Input : Layer_Outputs);
+   procedure Forward_Pass (Network : in out Neural_Network; Input : Float_Array);
    procedure Backward_Pass (Network : in out Neural_Network;
-                            Target : Layer_Outputs;
+                            Target : Float_Array;
                             Learning_Rate : Float);
 
    procedure Train_Step (Network : in out Neural_Network;
-                         Input : Layer_Outputs;
-                         Target : Layer_Outputs;
+                         Input : Float_Array;
+                         Target : Float_Array;
                          Learning_Rate : Float);
 
-   function Get_Network_Output (Network : Neural_Network) return Layer_Outputs;
-   function Calculate_Loss (Output, Target : Layer_Outputs) return Float;
+   function Get_Network_Output (Network : Neural_Network) return Float_Array;
+   function Calculate_Loss (Output, Target : Float_Array) return Float;
 
 end Neural_Net;

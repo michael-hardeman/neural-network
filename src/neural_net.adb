@@ -45,8 +45,8 @@ package body Neural_Net is
    ------------------
    -- Forward_Pass --
    ------------------
-   procedure Forward_Pass (Network : in out Neural_Network; Input : Layer_Outputs) is
-      procedure Compute_Layer (Layer : in out Layer_State; Previous_Output : Layer_Outputs) is begin
+   procedure Forward_Pass (Network : in out Neural_Network; Input : Float_Array) is
+      procedure Compute_Layer (Layer : in out Layer_State; Previous_Output : Float_Array) is begin
          for Neuron_Index in Layer.Outputs'Range loop
             declare
                Weighted_Sum : Float renames Layer.Input_Sums (Neuron_Index);
@@ -75,6 +75,7 @@ package body Neural_Net is
 
       for Layer_Index in Network'First + 1 .. Network'Last loop
          Compute_Layer (Network (Layer_Index).all, Network (Last_Index).Outputs);
+         Last_Index := Layer_Index;
       end loop;
    end Forward_Pass;
 
@@ -82,9 +83,9 @@ package body Neural_Net is
    -- Backward_Pass --
    -------------------
    procedure Backward_Pass (Network       : in out Neural_Network;
-                            Target        : Layer_Outputs;
+                            Target        : Float_Array;
                             Learning_Rate : Float) is
-      procedure Compute_Output_Layer_Deltas (Layer : in out Layer_State; Target : Layer_Outputs) is begin
+      procedure Compute_Output_Layer_Deltas (Layer : in out Layer_State; Target : Float_Array) is begin
          --  For output layer: delta = (output - target) * activation_derivative(input_sum)
          for I in Layer.Error_Deltas'Range loop
             declare
@@ -116,7 +117,7 @@ package body Neural_Net is
          end loop;
       end Compute_Hidden_Layer_Deltas;
 
-      procedure Compute_Gradients (Layer : in out Layer_State; Previous_Output : Layer_Outputs) is
+      procedure Compute_Gradients (Layer : in out Layer_State; Previous_Output : Float_Array) is
       begin
          --  Compute weight gradients: gradient = delta * previous_layer_output
          for I in Layer.Weight_Gradients'Range (1) loop
@@ -178,8 +179,8 @@ package body Neural_Net is
    -- Train_Step --
    ----------------
    procedure Train_Step (Network : in out Neural_Network;
-                         Input : Layer_Outputs;
-                         Target : Layer_Outputs;
+                         Input : Float_Array;
+                         Target : Float_Array;
                          Learning_Rate : Float) is
    begin
       Forward_Pass (Network, Input);
@@ -189,7 +190,7 @@ package body Neural_Net is
    --------------------
    -- Calculate_Loss --
    --------------------
-   function Calculate_Loss (Output, Target : Layer_Outputs) return Float is
+   function Calculate_Loss (Output, Target : Float_Array) return Float is
       Loss : Float := 0.0;
    begin
       --  Mean Squared Error
@@ -206,7 +207,7 @@ package body Neural_Net is
    ------------------------
    -- Get_Network_Output --
    ------------------------
-   function Get_Network_Output (Network : Neural_Network) return Layer_Outputs is begin
+   function Get_Network_Output (Network : Neural_Network) return Float_Array is begin
       return Network (Network'Last).all.Outputs;
    end Get_Network_Output;
 

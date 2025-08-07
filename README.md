@@ -8,10 +8,10 @@ with alire: `alr build`
 
 with gprbuild: `gprbuild neural_network.gpr`
 
-with gnatmake: `gnatmake -p -D obj -gnat2022 src/main.adb -o bin/main`
+with gnatmake: `gnatmake -p -D obj -gnat2022 src/example.adb -o bin/example`
 
 ## Running
 
 with alire: `alr run`
 
-others: run `bin/main`
+others: run `bin/example`

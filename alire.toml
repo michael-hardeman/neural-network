@@ -9,4 +9,4 @@ licenses = "GPL-2.0-or-later"
 website = ""
 tags = ["neural-network", "neural-net", "ml", "llm"]
 
-executables = ["main"]
+executables = ["example"]
